@@ -303,21 +303,52 @@ EOF
 #######################################
 system_docker_install() {
   print_banner
-  printf "${WHITE} 💻 Instalando docker...${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Instalando Redis...${GRAY_LIGHT}"
   printf "\n\n"
 
   sleep 2
 
   sudo su - root <<EOF
-  apt install -y apt-transport-https \
-                 ca-certificates curl \
-                 software-properties-common
+   # Verificar se o Redis já está instalado
+if command -v redis-server >/dev/null 2>&1; then
+    echo "Redis já está instalado. Pulando instalação..."
+else
+    echo "Redis não encontrado. Iniciando instalação..."
 
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  
-  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+    # Atualizar pacotes
+    sudo apt update && sudo apt upgrade -y
 
-  apt install -y docker-ce
+    # Instalar o Redis
+    sudo apt install redis-server -y
+fi
+
+# Configurar appendonly (se ainda não estiver configurado)
+if ! grep -q "appendonly yes" /etc/redis/redis.conf; then
+    echo "appendonly yes" | sudo tee -a /etc/redis/redis.conf
+fi
+
+# Adicionar senha (se ainda não estiver configurada)
+if ! grep -q "requirepass" /etc/redis/redis.conf; then
+    echo "requirepass ${mysql_root_password}" | sudo tee -a /etc/redis/redis.conf
+fi
+
+# Reiniciar o Redis para aplicar as alterações (se necessário)
+if ! sudo systemctl is-active --quiet redis-server; then
+    sudo systemctl start redis-server
+else
+    sudo systemctl restart redis-server
+fi
+  # apt install -y apt-transport-https \
+  #                ca-certificates curl \
+  #                software-properties-common
+  #
+  # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  #
+  #add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+  #
+  #apt install -y docker-ce
+
+
 EOF
 
   sleep 2

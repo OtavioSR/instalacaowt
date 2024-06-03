@@ -147,10 +147,11 @@ backend_update() {
   npm install @types/fs-extra
   rm -rf dist 
   npm run build
-  npx sequelize db:migrate
-  npx sequelize db:migrate
-  npx sequelize db:seed
-  pm2 start ${empresa_atualizar}-backend
+  #npx sequelize db:migrate
+  #npx sequelize db:migrate
+  npm run db:migrate
+  npm run db:seed
+  pm2 start ${empresa_atualizar}-backend --node-args="--max-old-space-size=4096"
   pm2 save 
 EOF
 
@@ -171,7 +172,8 @@ backend_db_migrate() {
 
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
-  npx sequelize db:migrate
+  npm run db:migrate
+
 EOF
 
   sleep 2
@@ -191,7 +193,7 @@ backend_db_seed() {
 
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
-  npx sequelize db:seed:all
+  npm run db:seed:all
 EOF
 
   sleep 2
@@ -212,7 +214,7 @@ backend_start_pm2() {
 
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
-  pm2 start dist/server.js --name ${instancia_add}-backend
+  pm2 start dist/server.js --name ${instancia_add}-backend --node-args="--max-old-space-size=4096"
 EOF
 
   sleep 2
