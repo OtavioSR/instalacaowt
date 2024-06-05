@@ -6,6 +6,7 @@ get_deploy() {
   printf "${WHITE} 💻 Insira senha para o usuario Deploy:${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " deploy_password
+  get_s3_option
 }
 
 get_s3_option() {
