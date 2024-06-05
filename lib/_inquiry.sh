@@ -33,9 +33,8 @@ get_s3_option() {
         read -p "> "  secret_key
 
         echo "Informe a região:"
-        read region
+        read -p "> " region
 
-        # ... (prompts para obter informações do S3)
     else
         get_frontend_url # Chama a função para obter a URL se não usar S3
     fi
