@@ -9,13 +9,13 @@
 #######################################
 system_create_user() {
   print_banner
-  printf "${WHITE} 💻 Agora, vamos criar o usuário para a instancia...${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Agora, vamos criar o usuário Deploy...${GRAY_LIGHT}"
   printf "\n\n"
 
   sleep 2
 
   sudo su - root <<EOF
-  useradd -m -p $(openssl passwd -crypt ${mysql_root_password}) -s /bin/bash -G sudo deploy
+  useradd -m -p $(openssl passwd -crypt ${deploy_password}) -s /bin/bash -G sudo deploy
   usermod -aG sudo deploy
 EOF
 
@@ -309,44 +309,15 @@ system_docker_install() {
   sleep 2
 
   sudo su - root <<EOF
-   # Verificar se o Redis já está instalado
-if command -v redis-server >/dev/null 2>&1; then
-    echo "Redis já está instalado. Pulando instalação..."
-else
-    echo "Redis não encontrado. Iniciando instalação..."
-
-    # Atualizar pacotes
-    sudo apt update && sudo apt upgrade -y
-
-    # Instalar o Redis
-    sudo apt install redis-server -y
-fi
-
-# Configurar appendonly (se ainda não estiver configurado)
-if ! grep -q "appendonly yes" /etc/redis/redis.conf; then
-    echo "appendonly yes" | sudo tee -a /etc/redis/redis.conf
-fi
-
-# Adicionar senha (se ainda não estiver configurada)
-if ! grep -q "requirepass" /etc/redis/redis.conf; then
-    echo "requirepass ${mysql_root_password}" | sudo tee -a /etc/redis/redis.conf
-fi
-
-# Reiniciar o Redis para aplicar as alterações (se necessário)
-if ! sudo systemctl is-active --quiet redis-server; then
-    sudo systemctl start redis-server
-else
-    sudo systemctl restart redis-server
-fi
-  # apt install -y apt-transport-https \
-  #                ca-certificates curl \
-  #                software-properties-common
-  #
-  # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  #
-  #add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-  #
-  #apt install -y docker-ce
+   apt install -y apt-transport-https \
+                  ca-certificates curl \
+                  software-properties-common
+  
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  
+  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+  
+  apt install -y docker-ce
 
 
 EOF
@@ -416,6 +387,29 @@ system_puppeteer_dependencies() {
                       libnss3 \
                       lsb-release \
                       xdg-utils
+EOF
+
+  sleep 2
+}
+
+#######################################
+# installs certbot
+# Arguments:
+#   None
+#######################################
+system_rabbitmq_install() {
+  print_banner
+  printf "${WHITE} 💻 Instalando certbot...${GRAY_LIGHT}"
+  printf "\n\n"
+
+  sleep 2
+
+  sudo su - root <<EOF
+  sudo apt-get install curl gnupg debian-keyring debian-archive-keyring -y
+  curl -fsSL https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/rabbitmq-release-signing-key.gpg
+  sudo apt-get update
+  sudo apt-get install rabbitmq-server -y
+  
 EOF
 
   sleep 2

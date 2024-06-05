@@ -8,7 +8,7 @@
 #######################################
 backend_redis_create() {
   print_banner
-  printf "${WHITE} 💻 Criando Redis & Banco Postgres...${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Criando Redis & Banco Postgres, e Rabbitmq ...${GRAY_LIGHT}"
   printf "\n\n"
 
   sleep 2
@@ -17,7 +17,12 @@ backend_redis_create() {
   usermod -aG docker deploy
   docker run --name redis-${instancia_add} -p ${redis_port}:6379 --restart always --detach redis redis-server --requirepass ${mysql_root_password}
   
+  sudo rabbitmqctl add_user deploy ${mysql_root_password}
+  sudo rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
+  sudo rabbitmqctl set_user_tags deploy administrator
+
   sleep 2
+
   sudo su - postgres
   createdb ${instancia_add};
   psql
@@ -68,12 +73,31 @@ DB_USER=${instancia_add}
 DB_PASS=${mysql_root_password}
 DB_NAME=${instancia_add}
 
+
+
+#AWS Storage Object
+S3_STORAGE_HOSPEDAGEM=${provider}
+S3_CHAVE_COMPARTILHA_BUCKET=${shared_key}
+S3_STORAGE_URL=${endpoint_url}
+S3_ACCESS_KEY=${access_key}
+S3_SECRET_KEY=${secret_key}
+S3_STORAGE_REGION=${region}
+
+
 JWT_SECRET=${jwt_secret}
 JWT_REFRESH_SECRET=${jwt_refresh_secret}
 
 REDIS_URI=redis://:${mysql_root_password}@127.0.0.1:${redis_port}
 REDIS_OPT_LIMITER_MAX=1
 REGIS_OPT_LIMITER_DURATION=3000
+
+
+RABBITMQ_USER=deploy
+RABBITMQ_PWD=${mysql_root_password}
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+
+
 
 USER_LIMIT=${max_user}
 CONNECTIONS_LIMIT=${max_whats}
@@ -193,7 +217,7 @@ backend_db_seed() {
 
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
-  npm run db:seed:all
+  npm run db:seed
 EOF
 
   sleep 2

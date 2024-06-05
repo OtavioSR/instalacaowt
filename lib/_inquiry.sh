@@ -1,9 +1,17 @@
 #!/bin/bash
 
+get_deploy() {
+  
+  print_banner
+  printf "${WHITE} 💻 Insira senha para o usuario Deploy:${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " deploy_password
+}
+
 get_mysql_root_password() {
   
   print_banner
-  printf "${WHITE} 💻 Insira senha para o usuario Deploy e Banco de Dados (Não utilizar caracteres especiais):${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Insira senha para o Banco de Dados (Não utilizar caracteres especiais):${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " mysql_root_password
 }
@@ -24,20 +32,53 @@ get_instancia_add() {
   read -p "> " instancia_add
 }
 
-get_max_whats() {
-  
-  print_banner
-  printf "${WHITE} 💻 Informe a Qtde de Conexões/Whats que a ${instancia_add} poderá cadastrar:${GRAY_LIGHT}"
-  printf "\n\n"
-  read -p "> " max_whats
-}
+#get_max_whats() {
+# 
+#  print_banner
+#  printf "${WHITE} 💻 Informe a Qtde de Conexões/Whats que a ${instancia_add} poderá cadastrar:${GRAY_LIGHT}"
+# printf "\n\n"
+# read -p "> " max_whats
+#}
 
-get_max_user() {
-  
+#get_max_user() {
+# 
+#print_banner
+#printf "${WHITE} 💻 Informe a Qtde de Usuarios/Atendentes que a ${instancia_add} poderá cadastrar:${GRAY_LIGHT}"
+#printf "\n\n"
+#read -p "> " max_user
+#}
+# Função para perguntar sobre o uso do S3
+get_s3_option() {
   print_banner
-  printf "${WHITE} 💻 Informe a Qtde de Usuarios/Atendentes que a ${instancia_add} poderá cadastrar:${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Utilizará o serviço S3 (Y, n):${GRAY_LIGHT}"
   printf "\n\n"
-  read -p "> " max_user
+  read -p "> " s3_option
+    
+
+    if [[ "$s3_option" == "Y" || "$s3_option" == "y" ]]; then
+        echo "Configuração do S3:"
+        echo "Informe o provedor (ex: AWS, CONTABO, MINIO):"
+        read -p "> "  provider
+
+        echo "Informe a chave compartilhada (opcional):"
+        read -p "> "  shared_key
+
+        echo "Informe a URL do endpoint:"
+        read -p "> "  endpoint_url
+
+        echo "Informe a Access Key:"
+       read -p "> "  access_key
+
+        echo "Informe a Secret Key:"
+        read -p "> "  secret_key
+
+        echo "Informe a região:"
+        read region
+
+        # ... (prompts para obter informações do S3)
+    else
+        get_frontend_url # Chama a função para obter a URL se não usar S3
+    fi
 }
 
 get_frontend_url() {
