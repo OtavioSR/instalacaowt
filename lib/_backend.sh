@@ -26,8 +26,8 @@ backend_redis_create() {
   sudo su - postgres
   createdb ${instancia_add};
   psql
-  CREATE USER deploy WITH PASSWORD '${mysql_root_password}';;
-  GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy
+  CREATE USER deploy WITH PASSWORD '${mysql_root_password}';
+  GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy;
   \q
   exit
 EOF
