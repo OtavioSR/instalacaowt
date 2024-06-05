@@ -20,12 +20,12 @@ backend_redis_create() {
   sudo rabbitmqctl add_user deploy ${mysql_root_password}
   sudo rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
   sudo rabbitmqctl set_user_tags deploy administrator
+ EOF
+ 
+sleep 2
 
-  sleep 2
-
-  sudo su - postgres
-  createdb ${instancia_add};
-  psql
+  sudo -u postgres psql<<EOF
+  CREATE DATABASE ${instancia_add};
   CREATE USER deploy WITH PASSWORD '${mysql_root_password}';
   GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy;
   \q
