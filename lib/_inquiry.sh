@@ -6,8 +6,7 @@ get_deploy() {
   printf "${WHITE} 💻 Insira senha para o usuario Deploy:${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " deploy_password
-  get_s3_option
-}
+ }
 
 get_s3_option() {
   print_banner
@@ -63,6 +62,7 @@ get_instancia_add() {
   printf "${WHITE} 💻 Informe um nome para a Instancia/Empresa que será instalada (Não utilizar espaços ou caracteres especiais, Utilizar Letras minusculas; ):${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " instancia_add
+   get_s3_option
 }
 
 #get_max_whats() {
