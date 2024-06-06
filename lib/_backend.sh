@@ -22,12 +22,20 @@ backend_redis_create() {
   sudo rabbitmqctl set_user_tags deploy administrator
  EOF
 
+sleep 2
 
-  sudo -u postgres psql <<EOF
-  CREATE DATABASE ${instancia_add};
-  CREATE USER deploy WITH PASSWORD '${mysql_root_password}';
-  GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy;
-  \q
+  sudo su - postgres <<EOF 
+  createdb ${instancia_add};
+  
+  # Verifica se o usuário 'deploy' já existe
+  if [[ -z $(psql -tAc "SELECT 1 FROM pg_roles WHERE rolname = 'deploy'") ]]; then
+    psql -c "CREATE USER deploy SUPERUSER INHERIT CREATEDB CREATEROLE; ALTER USER deploy PASSWORD '${mysql_root_password}';"
+  else
+    echo "Usuário 'deploy' já existe. Pulando criação..."
+  fi
+  psql -c "GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy;"
+  exit
+
 EOF
 
 sleep 2
