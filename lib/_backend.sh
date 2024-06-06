@@ -24,17 +24,14 @@ backend_redis_create() {
 
 sleep 2
 
-  sudo su - postgres <<EOF 
-  createdb ${instancia_add};
-  
-  # Verifica se o usuário 'deploy' já existe
-  if [[ -z $(psql -tAc "SELECT 1 FROM pg_roles WHERE rolname = 'deploy'") ]]; then
-    psql -c "CREATE USER deploy SUPERUSER INHERIT CREATEDB CREATEROLE; ALTER USER deploy PASSWORD '${mysql_root_password}';"
-  else
-    echo "Usuário 'deploy' já existe. Pulando criação..."
-  fi
-  psql -c "GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO deploy;"
-  exit
+# Criar banco de dados e usuário no PostgreSQL
+   sudo -u postgres psql -c "CREATE DATABASE ${instancia_add};"
+   sudo -u postgres psql -c "CREATE USER ${instancia_add};"
+   sudo -u postgres psql -c "ALTER USER ${instancia_add} PASSWORD '${mysql_root_password}';"
+
+   # Conceder privilégios e alterar proprietário da tabela
+   sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO ${instancia_add};"
+   sudo -u postgres psql -c "ALTER DATABASE ${instancia_add} OWNER TO ${instancia_add};"
 
 EOF
 
@@ -75,7 +72,7 @@ PORT=${backend_port}
 DB_DIALECT=postgres
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=deploy
+DB_USER=${instancia_add}
 DB_PASS=${mysql_root_password}
 DB_NAME=${instancia_add}
 
