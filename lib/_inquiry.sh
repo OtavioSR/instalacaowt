@@ -62,8 +62,7 @@ get_instancia_add() {
   printf "${WHITE} 💻 Informe um nome para a Instancia/Empresa que será instalada (Não utilizar espaços ou caracteres especiais, Utilizar Letras minusculas; ):${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " instancia_add
-   get_s3_option
-}
+  }
 
 #get_max_whats() {
 # 
@@ -204,8 +203,7 @@ get_urls() {
   get_mysql_root_password
   get_link_git
   get_instancia_add
-  get_max_whats
-  get_max_user
+  get_s3_option
   get_frontend_url
   get_backend_url
   get_frontend_port
