@@ -36,7 +36,7 @@ get_s3_option() {
         read -p "> " region
 
     else
-       # get_frontend_url # Chama a função para obter a URL se não usar S3
+       echo "prosseguindo"
     fi
 }
 
