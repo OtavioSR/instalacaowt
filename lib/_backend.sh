@@ -11,20 +11,23 @@ backend_redis_create() {
   printf "${WHITE} 💻 Criando Redis & Banco Postgres, e Rabbitmq ...${GRAY_LIGHT}"
   printf "\n\n"
 
-  sleep 2
+ sleep 2
 
   sudo su - root <<EOF
   usermod -aG docker deploy
   docker run --name redis-${instancia_add} -p ${redis_port}:6379 --restart always --detach redis redis-server --requirepass ${mysql_root_password}
-  
+EOF
+
+ sleep 2
+
   sudo rabbitmqctl add_user deploy ${mysql_root_password}
   sudo rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
   sudo rabbitmqctl set_user_tags deploy administrator
- EOF
 
-sleep 2
 
-# Criar banco de dados e usuário no PostgreSQL
+ sleep 2
+
+  # Criar banco de dados e usuário no PostgreSQL
    sudo -u postgres psql -c "CREATE DATABASE ${instancia_add};"
    sudo -u postgres psql -c "CREATE USER ${instancia_add};"
    sudo -u postgres psql -c "ALTER USER ${instancia_add} PASSWORD '${mysql_root_password}';"
@@ -33,9 +36,7 @@ sleep 2
    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${instancia_add} TO ${instancia_add};"
    sudo -u postgres psql -c "ALTER DATABASE ${instancia_add} OWNER TO ${instancia_add};"
 
-EOF
-
-sleep 2
+ sleep 2
 
 }
 
@@ -76,16 +77,14 @@ DB_USER=${instancia_add}
 DB_PASS=${mysql_root_password}
 DB_NAME=${instancia_add}
 
-
-
-#AWS Storage Object
 S3_STORAGE_HOSPEDAGEM=${provider}
 S3_CHAVE_COMPARTILHA_BUCKET=${shared_key}
+
+#AWS Storage Object
 S3_STORAGE_URL=${endpoint_url}
 S3_ACCESS_KEY=${access_key}
 S3_SECRET_KEY=${secret_key}
 S3_STORAGE_REGION=${region}
-
 
 JWT_SECRET=${jwt_secret}
 JWT_REFRESH_SECRET=${jwt_refresh_secret}
@@ -174,11 +173,9 @@ backend_update() {
   npm install @types/fs-extra
   rm -rf dist 
   npm run build
-  #npx sequelize db:migrate
-  #npx sequelize db:migrate
   npm run db:migrate
   npm run db:seed
-  pm2 start ${empresa_atualizar}-backend --node-args="--max-old-space-size=4096"
+  pm2 start ${empresa_atualizar}-backend --node-args="--max-old-space-size=${size_memory_node}"
   pm2 save 
 EOF
 

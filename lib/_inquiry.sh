@@ -8,6 +8,14 @@ get_deploy() {
   read -p "> " deploy_password
  }
 
+get_memory_node() {
+  
+  print_banner
+  printf "${WHITE} 💻 Insira senha o tamanho da memória para o node em MB (exemplo 4096):${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " size_memory_node
+ }
+
 get_s3_option() {
   print_banner
   printf "${WHITE} 💻 Utilizará o serviço S3 (Y, n):${GRAY_LIGHT}"
@@ -79,9 +87,6 @@ get_instancia_add() {
 #printf "\n\n"
 #read -p "> " max_user
 #}
-
-
-# Função para perguntar sobre o uso do S3
 
 
 get_frontend_url() {
@@ -209,6 +214,7 @@ get_urls() {
   get_frontend_port
   get_backend_port
   get_redis_port
+  get_memory_node
 }
 
 software_update() {
