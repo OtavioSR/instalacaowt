@@ -135,7 +135,7 @@ get_rabbitmq_port() {
   print_banner
   printf "${WHITE} 💻 Digite a porta do Rabbitmq ${instancia_add}; Ex: 5600 A 5700 ${GRAY_LIGHT}"
   printf "\n\n"
-  read -p "> " raabitmq_port
+  read -p "> " rabbitmq_port
 }
 
 get_empresa_delete() {
