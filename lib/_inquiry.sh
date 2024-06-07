@@ -130,6 +130,14 @@ get_redis_port() {
   read -p "> " redis_port
 }
 
+get_rabbitmq_port() {
+  
+  print_banner
+  printf "${WHITE} 💻 Digite a porta do Rabbitmq ${instancia_add}; Ex: 5600 A 5700 ${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " raabitmq_port
+}
+
 get_empresa_delete() {
   
   print_banner
@@ -214,6 +222,7 @@ get_urls() {
   get_frontend_port
   get_backend_port
   get_redis_port
+  get_rabbitmq_port
   get_memory_node
 }
 

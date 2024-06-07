@@ -20,9 +20,24 @@ EOF
 
  sleep 2
 
-  sudo rabbitmqctl add_user deploy ${mysql_root_password}
-  sudo rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
-  sudo rabbitmqctl set_user_tags deploy administrator
+ sudo su - root <<EOF
+usermod -aG docker deploy
+docker run --name rabbitmq-${instancia_add} \
+           -p ${rabbitmq_port}:5672 \
+           -p 1${rabbitmq_port}:15672 \
+           -e RABBITMQ_DEFAULT_USER=deploy \
+           -e RABBITMQ_DEFAULT_PASS=${mysql_root_password} \
+           --restart always \
+           --detach rabbitmq:3-management
+EOF
+
+  docker exec rabbitmq-${instancia_add} rabbitmqctl add_user deploy ${mysql_root_password}
+  docker exec rabbitmq-${instancia_add} rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
+  docker exec rabbitmq-${instancia_add} rabbitmqctl set_user_tags deploy administrator 
+
+  #sudo rabbitmqctl add_user deploy ${mysql_root_password}
+  #sudo rabbitmqctl set_permissions -p / deploy ".*" ".*" ".*"
+  #sudo rabbitmqctl set_user_tags deploy administrator
 
 
  sleep 2

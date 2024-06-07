@@ -78,6 +78,7 @@ deletar_tudo() {
 
   sudo su - root <<EOF
   docker container rm redis-${empresa_delete} --force
+  docker container rm rabbitmq-${empresa_delete} --force
   cd && rm -rf /etc/nginx/sites-enabled/${empresa_delete}-frontend
   cd && rm -rf /etc/nginx/sites-enabled/${empresa_delete}-backend  
   cd && rm -rf /etc/nginx/sites-available/${empresa_delete}-frontend
