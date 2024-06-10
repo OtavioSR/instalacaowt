@@ -398,22 +398,22 @@ EOF
 # Arguments:
 #   None
 #######################################
-system_rabbitmq_install() {
-  print_banner
-  printf "${WHITE} 💻 Instalando Rabbitmq...${GRAY_LIGHT}"
-  printf "\n\n"
+#system_rabbitmq_install() {
+  #print_banner
+  #printf "${WHITE} 💻 Instalando Rabbitmq...${GRAY_LIGHT}"
+ # printf "\n\n"
 
-  sleep 2
+ # sleep 2
 
-  sudo apt-get install curl gnupg debian-keyring debian-archive-keyring -y
-  curl -fsSL https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/rabbitmq-release-signing-key.gpg
-  sudo apt-get update
-  sudo apt-get install rabbitmq-server -y
-  sudo systemctl enable rabbitmq-server
-  sudo systemctl start rabbitmq-server
+  #sudo apt-get install curl gnupg debian-keyring debian-archive-keyring -y
+ # curl -fsSL https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/rabbitmq-release-signing-key.gpg
+  #sudo apt-get update
+ # sudo apt-get install rabbitmq-server -y
+ # sudo systemctl enable rabbitmq-server
+ # sudo systemctl start rabbitmq-server
 
-  sleep 2
-}
+  #sleep 2
+#}
 
 #######################################
 # installs pm2
