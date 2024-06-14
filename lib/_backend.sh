@@ -253,7 +253,7 @@ backend_start_pm2() {
 
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
-  pm2 start dist/server.js --name ${instancia_add}-backend --node-args="--max-old-space-size=4096"
+  pm2 start dist/server.js --name ${backend_port}-${instancia_add}-back --node-args="--max-old-space-size=${size_memory_node}"
 EOF
 
   sleep 2

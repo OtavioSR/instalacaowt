@@ -11,7 +11,7 @@ get_deploy() {
 get_memory_node() {
   
   print_banner
-  printf "${WHITE} 💻 Insira senha o tamanho da memória para o node em MB (exemplo 4096):${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Insira senha o tamanho da memória para o node em MB (exemplo 2048):${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " size_memory_node
  }
@@ -123,20 +123,84 @@ get_backend_port() {
 }
 
 get_redis_port() {
-  
-  print_banner
-  printf "${WHITE} 💻 Digite a porta do REDIS/AGENDAMENTO MSG para a ${instancia_add}; Ex: 5001 A 5999 ${GRAY_LIGHT}"
-  printf "\n\n"
-  read -p "> " redis_port
+    print_banner
+
+ # Encontra as portas de todos os containers que começam com "redis-"
+    redis_ports=$(docker ps --filter "name=redis-*" --format '{{.Ports}}' | awk -F'->' '{print $1}' | cut -d':' -f2)
+
+    # Encontra a porta Redis mais alta em uso (incluindo containers)
+    highest_port=0
+    for port in $redis_ports; do
+        if (( port > highest_port )); then
+            highest_port=$port
+        fi
+    done
+
+    # Se não encontrar nenhuma porta Redis, começa em 5001
+    if [ $highest_port -eq 0 ]; then
+        highest_port=5000
+    fi
+
+    # Sugere a próxima porta disponível
+    suggested_port=$((highest_port + 1))
+
+    read -p "${WHITE} 💻 Digite a porta do REDIS/AGENDAMENTO MSG para a ${instancia_add} (ou Enter para usar $suggested_port): ${GRAY_LIGHT}" redis_port
+
+    # Se a entrada estiver em branco, usa a porta sugerida
+    if [ -z "$redis_port" ]; then
+        redis_port=$suggested_port
+        echo "Usando a porta sugerida: $redis_port"
+    fi
+
+    
 }
+
+
 
 get_rabbitmq_port() {
   
-  print_banner
-  printf "${WHITE} 💻 Digite a porta do Rabbitmq ${instancia_add}; Ex: 5600 A 5700 ${GRAY_LIGHT}"
-  printf "\n\n"
-  read -p "> " rabbitmq_port
+  #print_banner
+  #printf "${WHITE} 💻 Digite a porta do Rabbitmq ${instancia_add}; Ex: 5600 A 5700 ${GRAY_LIGHT}"
+  #printf "\n\n"
+  #read -p "> " rabbitmq_port
+
+    print_banner
+
+    # Encontra as portas de todos os containers que começam com "rabbitmq"
+    rabbitmq_ports=$(docker ps --filter "name=rabbitmq-*" --format '{{.Ports}}')
+
+    # Verifica se algum container RabbitMQ foi encontrado
+    if [ -z "$rabbitmq_ports" ]; then
+        echo "${RED} ❌ Erro: Nenhum container RabbitMQ encontrado.${NC}"
+        exit 1
+    fi
+
+    # Extrai a porta AMQP (a partir de 5600)
+    for ports_info in $rabbitmq_ports; do
+        amqp_port=$(echo "$ports_info" | grep -oP '(?<=:)\d+(?=->56\d\d/tcp)')
+        if [ ! -z "$amqp_port" ]; then
+            rabbitmq_port=$amqp_port
+            break  # Encontrou a porta AMQP, sai do loop
+        fi
+    done
+
+    # Se não encontrar a porta AMQP, assume que a porta 5600 está sendo usada
+    if [ -z "$rabbitmq_port" ]; then
+        rabbitmq_port=5600
+    fi
+
+    read -p "${WHITE} 💻 Digite a porta do RabbitMQ para a ${instancia_add} (ou Enter para usar $rabbitmq_port): ${GRAY_LIGHT}" input_port
+
+    # Se a entrada estiver em branco, usa a porta encontrada
+    if [ -z "$input_port" ]; then
+        echo "Usando a porta encontrada: $rabbitmq_port"
+    else
+        rabbitmq_port=$input_port
+    fi
+  
 }
+
+
 
 get_empresa_delete() {
   
