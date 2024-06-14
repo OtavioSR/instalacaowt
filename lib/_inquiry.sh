@@ -125,24 +125,32 @@ get_backend_port() {
 get_redis_port() {
     print_banner
 
- # Encontra as portas de todos os containers que começam com "redis-"
+    # Encontra as portas de todos os containers que começam com "redis-"
     redis_ports=$(docker ps --filter "name=redis-*" --format '{{.Ports}}' | awk -F'->' '{print $1}' | cut -d':' -f2)
 
-    # Encontra a porta Redis mais alta em uso (incluindo containers)
-    highest_port=0
+    # Encontra a porta Redis mais alta em uso (incluindo containers) dentro do intervalo 5000-5999
+    highest_port=5000  # Começa em 5000, o início do intervalo
     for port in $redis_ports; do
-        if (( port > highest_port )); then
+        if (( port > highest_port && port <= 5999 )); then  # Verifica se a porta está dentro do intervalo
             highest_port=$port
         fi
     done
 
-    # Se não encontrar nenhuma porta Redis, começa em 5001
-    if [ $highest_port -eq 0 ]; then
-        highest_port=5000
-    fi
-
-    # Sugere a próxima porta disponível
+    # Sugere a próxima porta disponível dentro do intervalo
     suggested_port=$((highest_port + 1))
+    while (( suggested_port <= 5999 )); do
+        # Verifica se a porta sugerida está em uso por algum outro processo
+        if ! ss -tulpn | awk '{print $4}' | grep -q ":$suggested_port$"; then
+            break  # Encontrou uma porta livre
+        fi
+        suggested_port=$((suggested_port + 1))
+    done
+
+    # Se não encontrar nenhuma porta livre no intervalo, exibe um erro
+    if (( suggested_port > 5999 )); then
+        echo "${RED} ❌ Erro: Nenhuma porta Redis livre encontrada no intervalo 5000-5999.${NC}"
+        exit 1
+    fi
 
     read -p "${WHITE} 💻 Digite a porta do REDIS/AGENDAMENTO MSG para a ${instancia_add} (ou Enter para usar $suggested_port): ${GRAY_LIGHT}" redis_port
 
@@ -151,19 +159,11 @@ get_redis_port() {
         redis_port=$suggested_port
         echo "Usando a porta sugerida: $redis_port"
     fi
-
-    
 }
 
 
 
 get_rabbitmq_port() {
-  
-  #print_banner
-  #printf "${WHITE} 💻 Digite a porta do Rabbitmq ${instancia_add}; Ex: 5600 A 5700 ${GRAY_LIGHT}"
-  #printf "\n\n"
-  #read -p "> " rabbitmq_port
-
     print_banner
 
     # Encontra as portas de todos os containers que começam com "rabbitmq"
@@ -171,33 +171,40 @@ get_rabbitmq_port() {
 
     # Verifica se algum container RabbitMQ foi encontrado
     if [ -z "$rabbitmq_ports" ]; then
-        echo "${RED} ❌ Erro: Nenhum container RabbitMQ encontrado.${NC}"
-        exit 1
-    fi
+        suggested_port=5672  # Porta inicial para sugestão
+        while true; do
+            # Verifica se a porta sugerida está em uso por algum outro processo
+            if ! ss -tulpn | awk '{print $4}' | grep -q ":$suggested_port$"; then
+                rabbitmq_port=$suggested_port
+                echo "${YELLOW} ⚠️ Aviso: Nenhum container RabbitMQ encontrado. Sugerindo a porta $rabbitmq_port.${NC}"
+                break
+            fi
+            suggested_port=$((suggested_port + 1))  # Incrementa a porta sugerida
+        done
+    else
+        # Extrai a porta AMQP (a partir de 5600)
+        for ports_info in $rabbitmq_ports; do
+            amqp_port=$(echo "$ports_info" | grep -oP '(?<=:)\d+(?=->56\d\d/tcp)')
+            if [ ! -z "$amqp_port" ]; then
+                rabbitmq_port=$amqp_port
+                break  # Encontrou a porta AMQP, sai do loop
+            fi
+        done
 
-    # Extrai a porta AMQP (a partir de 5600)
-    for ports_info in $rabbitmq_ports; do
-        amqp_port=$(echo "$ports_info" | grep -oP '(?<=:)\d+(?=->56\d\d/tcp)')
-        if [ ! -z "$amqp_port" ]; then
-            rabbitmq_port=$amqp_port
-            break  # Encontrou a porta AMQP, sai do loop
+        # Se não encontrar a porta AMQP, assume que a porta 5600 está sendo usada
+        if [ -z "$rabbitmq_port" ]; then
+            rabbitmq_port=5600
         fi
-    done
-
-    # Se não encontrar a porta AMQP, assume que a porta 5600 está sendo usada
-    if [ -z "$rabbitmq_port" ]; then
-        rabbitmq_port=5600
     fi
 
     read -p "${WHITE} 💻 Digite a porta do RabbitMQ para a ${instancia_add} (ou Enter para usar $rabbitmq_port): ${GRAY_LIGHT}" input_port
 
-    # Se a entrada estiver em branco, usa a porta encontrada
+    # Se a entrada estiver em branco, usa a porta sugerida ou a encontrada
     if [ -z "$input_port" ]; then
-        echo "Usando a porta encontrada: $rabbitmq_port"
+        echo "Usando a porta: $rabbitmq_port"
     else
         rabbitmq_port=$input_port
     fi
-  
 }
 
 
