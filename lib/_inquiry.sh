@@ -169,34 +169,36 @@ get_rabbitmq_port() {
     # Encontra as portas de todos os containers que começam com "rabbitmq"
     rabbitmq_ports=$(docker ps --filter "name=rabbitmq-*" --format '{{.Ports}}')
 
-    # Verifica se algum container RabbitMQ foi encontrado
-    if [ -z "$rabbitmq_ports" ]; then
-        suggested_port=5672  # Porta inicial para sugestão
-        while true; do
-            # Verifica se a porta sugerida está em uso por algum outro processo
-            if ! ss -tulpn | awk '{print $4}' | grep -q ":$suggested_port$"; then
-                rabbitmq_port=$suggested_port
-                echo "${YELLOW} ⚠️ Aviso: Nenhum container RabbitMQ encontrado. Sugerindo a porta $rabbitmq_port.${NC}"
-                break
-            fi
-            suggested_port=$((suggested_port + 1))  # Incrementa a porta sugerida
-        done
-    else
-        # Extrai a porta AMQP (a partir de 5600)
-        for ports_info in $rabbitmq_ports; do
-            amqp_port=$(echo "$ports_info" | grep -oP '(?<=:)\d+(?=->56\d\d/tcp)')
-            if [ ! -z "$amqp_port" ]; then
-                rabbitmq_port=$amqp_port
-                break  # Encontrou a porta AMQP, sai do loop
-            fi
-        done
-
-        # Se não encontrar a porta AMQP, assume que a porta 5600 está sendo usada
-        if [ -z "$rabbitmq_port" ]; then
-            rabbitmq_port=5600
+    # Encontra a porta RabbitMQ mais alta em uso (incluindo containers) dentro do intervalo 5600-5700
+    highest_port=5600  # Começa em 5600, o início do intervalo
+    for port in $rabbitmq_ports; do
+        if (( port > highest_port && port <= 5700 )); then  # Verifica se a porta está dentro do intervalo
+            highest_port=$port
         fi
+    done
+
+    # Sugere a próxima porta disponível dentro do intervalo
+    suggested_port=$((highest_port + 1))
+    while (( suggested_port <= 5700 )); do
+        # Verifica se a porta sugerida está em uso por algum outro processo
+        if ! ss -tulpn | awk '{print $4}' | grep -q ":$suggested_port$"; then
+            break  # Encontrou uma porta livre
+        fi
+        suggested_port=$((suggested_port + 1))
+    done
+
+    # Se não encontrar nenhuma porta livre no intervalo, exibe um erro
+    if (( suggested_port > 5700 )); then
+        echo "${RED} ❌ Erro: Nenhuma porta RabbitMQ livre encontrada no intervalo 5600-5700.${NC}"
+        exit 1
     fi
 
+    # Se nenhum container RabbitMQ foi encontrado, usa a porta sugerida
+    if [ -z "$rabbitmq_ports" ]; then
+        rabbitmq_port=$suggested_port
+        echo "${YELLOW} ⚠️ Aviso: Nenhum container RabbitMQ encontrado. Sugerindo a porta $rabbitmq_port.${NC}"
+    fi
+    
     read -p "${WHITE} 💻 Digite a porta do RabbitMQ para a ${instancia_add} (ou Enter para usar $rabbitmq_port): ${GRAY_LIGHT}" input_port
 
     # Se a entrada estiver em branco, usa a porta sugerida ou a encontrada
