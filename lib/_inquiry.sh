@@ -151,8 +151,9 @@ get_redis_port() {
         echo "${RED} ❌ Erro: Nenhuma porta Redis livre encontrada no intervalo 5000-5999.${NC}"
         exit 1
     fi
-
-    read -p "${WHITE} 💻 Digite a porta do REDIS/AGENDAMENTO MSG para a ${instancia_add} (ou Enter para usar $suggested_port): ${GRAY_LIGHT}" redis_port
+    printf "${WHITE} 💻 Digite a porta do REDIS/AGENDAMENTO MSG para a ${instancia_add} (ou Enter para usar $suggested_port): ${GRAY_LIGHT}"
+    printf "\n\n"
+    read -p "> " redis_port
 
     # Se a entrada estiver em branco, usa a porta sugerida
     if [ -z "$redis_port" ]; then
@@ -198,9 +199,11 @@ get_rabbitmq_port() {
         rabbitmq_port=$suggested_port
         echo "${YELLOW} ⚠️ Aviso: Nenhum container RabbitMQ encontrado. Sugerindo a porta $rabbitmq_port.${NC}"
     fi
-    
-    read -p "${WHITE} 💻 Digite a porta do RabbitMQ para a ${instancia_add} (ou Enter para usar $rabbitmq_port): ${GRAY_LIGHT}" input_port
 
+    printf "${WHITE} 💻 Digite a porta do RabbitMQ para a ${instancia_add} (ou Enter para usar $rabbitmq_port): ${GRAY_LIGHT}"
+    printf "\n\n"
+    read -p "> " input_port
+    
     # Se a entrada estiver em branco, usa a porta sugerida ou a encontrada
     if [ -z "$input_port" ]; then
         echo "Usando a porta: $rabbitmq_port"
