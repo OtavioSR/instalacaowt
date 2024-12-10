@@ -516,6 +516,20 @@ EOF
   sleep 2
 }
 
+system_nginx_reload() {
+  print_banner
+  printf "${WHITE} 💻 recarregando o nginx...${GRAY_LIGHT}"
+  printf "\n\n"
+
+  sleep 2
+
+  sudo su - root <<EOF
+  service nginx reload
+EOF
+
+  sleep 2
+}
+
 #######################################
 # setup for nginx.conf
 # Arguments:
