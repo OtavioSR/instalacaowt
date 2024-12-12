@@ -575,7 +575,7 @@ system_domain_conf() {
       -H "Content-Type: application/json" \
       --data "{
           \"type\": \"A\",
-          \"name\": \"$backend_url\",
+          \"name\": \"${backend_url#https://}\",
           \"content\": \"$ip_adress\",
           \"ttl\": 3600,
           \"proxied\": true
@@ -595,7 +595,7 @@ system_domain_conf() {
       -H "Content-Type: application/json" \
       --data "{
           \"type\": \"A\",
-          \"name\": \"$frontend_url\",
+          \"name\": \"${frontend_url#https://}\",
           \"content\": \"$ip_adress\",
           \"ttl\": 3600,
           \"proxied\": true
