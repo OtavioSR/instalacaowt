@@ -559,69 +559,57 @@ EOF
 #   None
 #######################################
 system_domain_conf() {
-  print_banner
-  printf "${WHITE} 💻 configurando subdominios...${GRAY_LIGHT}"
-  printf "\n\n"
-
+ print_banner
+  printf "${WHITE} 💻 Configurando subdomínios...${GRAY_LIGHT}\n\n"
   sleep 2
 
-sudo su - root << EOF
+  # Verifica se as variáveis necessárias estão definidas
+  if [ -z "$backend_url" ] || [ -z "$frontend_url" ] || [ -z "$ip_adress" ] || [ -z "$zone_id" ] || [ -z "$api_token" ]; then
+      echo "Erro: uma ou mais variáveis necessárias não estão definidas."
+      exit 1
+  fi
 
-# Configurações do Cloudflare
+  echo "Criando o subdomínio $backend_url apontando para $ip_adress no Cloudflare..."
+  response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+      -H "Authorization: Bearer $api_token" \
+      -H "Content-Type: application/json" \
+      --data "{
+          \"type\": \"A\",
+          \"name\": \"$backend_url\",
+          \"content\": \"$ip_adress\",
+          \"ttl\": 3600,
+          \"proxied\": true
+      }")
 
+  if echo "$response" | grep -q '"success":true'; then
+      echo "Subdomínio criado com sucesso!"
+  else
+      echo "Falha ao criar o subdomínio. Resposta da API:"
+      echo "$response"
+      exit 1
+  fi
 
-TTL=3600                          # TTL do registro (3600 = 1 hora)
-PROXIED=true                    # Defina como true para usar o proxy do Cloudflare
+  echo "Criando o subdomínio $frontend_url apontando para $ip_adress no Cloudflare..."
+  response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+      -H "Authorization: Bearer $api_token" \
+      -H "Content-Type: application/json" \
+      --data "{
+          \"type\": \"A\",
+          \"name\": \"$frontend_url\",
+          \"content\": \"$ip_adress\",
+          \"ttl\": 3600,
+          \"proxied\": true
+      }")
 
+  if echo "$response" | grep -q '"success":true'; then
+      echo "Subdomínio criado com sucesso!"
+  else
+      echo "Falha ao criar o subdomínio. Resposta da API:"
+      echo "$response"
+      exit 1
+  fi
 
-
-echo "Criando o subdomínio $backend_url apontando para $ip_adress no Cloudflare..."
-
-response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
-    -H "Authorization: Bearer $api_token" \
-    -H "Content-Type: application/json" \
-    --data '{
-        "type": "A",
-        "name": "'$backend_url'",
-        "content": "'"$ip_adress"'",
-        "ttl": '"3600"',
-        "proxied": '"true"'
-    }')
-
-# Verificando o resultado
-if echo "$response" | grep -q '"success":true'; then
-    echo "Subdomínio criado com sucesso!"
-else
-    echo "Falha ao criar o subdomínio. Resposta da API:"
-    echo "$response"
-    exit 1
-fi
-
-echo "Criando o subdomínio $frontend_url apontando para $ip_adress no Cloudflare..."
-
-response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
-    -H "Authorization: Bearer $api_token" \
-    -H "Content-Type: application/json" \
-    --data '{
-        "type": "A",
-        "name": "'$frontend_url'",
-        "content": "'"$ip_adress"'",
-        "ttl": '"3600"',
-        "proxied": '"true"'
-    }')
-
-# Verificando o resultado
-if echo "$response" | grep -q '"success":true'; then
-    echo "Subdomínio criado com sucesso!"
-else
-    echo "Falha ao criar o subdomínio. Resposta da API:"
-    echo "$response"
-    exit 1
-fi
-
-EOF
-
-  sleep 10
+  sleep 20
 }
 
 
