@@ -71,4 +71,5 @@ frontend_nginx_setup
 # network related
 system_nginx_conf
 system_nginx_restart
+system_domain_conf
 system_certbot_setup

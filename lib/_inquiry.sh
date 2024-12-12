@@ -48,6 +48,30 @@ get_s3_option() {
     fi
 }
 
+get_domain_option() {
+  print_banner
+  printf "${WHITE} 💻 Configurar o subdominio (Y, n):${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " domain_option
+    
+
+    if [[ "$domain_option" == "Y" || "$domain_option" == "y" ]]; then
+        echo "Configuração do Dominoi:"
+        echo "Informe a API Token:"
+        read -p "> "  api_token
+
+        echo "Informe Zone ID:"
+        read -p "> "  zone_id
+
+        echo "Informe o Ip do servidor:"
+        read -p "> "  ip_adress
+
+        
+    else
+       echo "prosseguindo"
+    fi
+}
+
 get_mysql_root_password() {
   
   print_banner
@@ -285,6 +309,7 @@ get_urls() {
   get_link_git
   get_instancia_add
   get_s3_option
+  get_domain_option
   get_frontend_url
   get_backend_url
   get_frontend_port
