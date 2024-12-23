@@ -566,7 +566,7 @@ system_domain_conf() {
   # Verifica se as variáveis necessárias estão definidas
   if [ -z "$backend_url" ] || [ -z "$frontend_url" ] || [ -z "$ip_adress" ] || [ -z "$zone_id" ] || [ -z "$api_token" ]; then
       echo "Erro: uma ou mais variáveis necessárias não estão definidas."
-      exit 1
+      sleep 5
   fi
 
   echo "Criando o subdomínio $backend_url apontando para $ip_adress no Cloudflare..."
@@ -586,7 +586,7 @@ system_domain_conf() {
   else
       echo "Falha ao criar o subdomínio. Resposta da API:"
       echo "$response"
-      exit 1
+      sleep 5
   fi
 
   echo "Criando o subdomínio $frontend_url apontando para $ip_adress no Cloudflare..."
@@ -606,7 +606,7 @@ system_domain_conf() {
   else
       echo "Falha ao criar o subdomínio. Resposta da API:"
       echo "$response"
-      exit 1
+      sleep 5
   fi
 
   sleep 20
