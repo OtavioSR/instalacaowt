@@ -304,7 +304,7 @@ EOF
 #######################################
 system_docker_install() {
   print_banner
-  printf "${WHITE} 💻 Instalando Redis...${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Instalando Docker...${GRAY_LIGHT}"
   printf "\n\n"
 
   sleep 2
