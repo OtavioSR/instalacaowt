@@ -282,16 +282,23 @@ system_node_install() {
   sleep 2
 
   sudo su - root <<EOF
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-  sleep 2
-  npm install -g npm@latest
-  sleep 2
-  sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  sudo apt-get update -y && sudo apt-get -y install postgresql
-  sleep 2
-  sudo timedatectl set-timezone America/Sao_Paulo
+  
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sleep 2
+
+npm install -g npm@latest
+sleep 2
+
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt noble-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/postgresql.gpg > /dev/null
+
+sudo apt-get update -y
+sudo apt-get install -y postgresql
+sleep 2
+
+sudo timedatectl set-timezone America/Sao_Paulo
   
 EOF
 
@@ -310,15 +317,12 @@ system_docker_install() {
   sleep 2
 
   sudo su - root <<EOF
-   apt install -y apt-transport-https \
-                  ca-certificates curl \
-                  software-properties-common
   
-   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  
-  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-  
-  apt install -y docker-ce
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu noble stable"
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
 
 
 EOF
