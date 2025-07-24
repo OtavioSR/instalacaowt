@@ -80,10 +80,26 @@ get_mysql_root_password() {
   read -p "> " mysql_root_password
 }
 
+get_github_user() {
+  
+  print_banner
+  printf "${WHITE} 💻 Inserir Usuario Github:${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " github_user
+}
+
+get_github_token() {
+  
+  print_banner
+  printf "${WHITE} 💻 Inserir Token Github:${GRAY_LIGHT}"
+  printf "\n\n"
+  read -p "> " github_token
+}
+
 get_link_git() {
   
   print_banner
-  printf "${WHITE} 💻 Insira o link do GITHUB do Whaticket que deseja instalar:${GRAY_LIGHT}"
+  printf "${WHITE} 💻 Insira o repositório do GITHUB do Whaticket que deseja instalar:${GRAY_LIGHT}"
   printf "\n\n"
   read -p "> " link_git
 }
@@ -307,6 +323,8 @@ get_alter_backend_port() {
 get_urls() {
   get_mysql_root_password
   get_link_git
+  get_github_user
+  get_github_token
   get_instancia_add
   get_s3_option
   get_domain_option
